@@ -29,7 +29,6 @@ const auth0Options = {
 @Injectable()
 export class AuthService {
   private lock: Auth0LockStatic;
-  // readonly auth0User$ = new ReplaySubject<AuthUser | null>();
   private login$ = new Subject<void>();
 
 
@@ -51,10 +50,8 @@ export class AuthService {
         // await this.updateAuthenticatedState();
 
         this.lock.getProfile(authResult.idToken, async (err, profile) => {
-          if (err) { throw err; }
+          if (err) { throw err; }          
           this.dispatcher$.next(new UpdateAuthUserProfileAction(profile));
-          console.log('profile:', profile);
-          this.login$.next();
           await this.updateAuthenticatedState();
         });
       });
@@ -62,28 +59,29 @@ export class AuthService {
   }
 
 
-  login(): Observable<void> {
+  signIn(): Observable<void> {
     this.lock.show();
     return this.login$.asObservable();
   }
 
 
-  logout(): Observable<void> {
+  signOut(): Observable<void> {
     this.dispatcher$.next(new AuthLogoutAction());
-    return Observable.from(this.firebaseAuthService.logout());
+    return Observable.from(this.firebaseAuthService.signOut());
   }
 
 
   private async updateAuthenticatedState(): Promise<void> {
     if (this.authenticated()) {
-      console.log('Auth0: LOG-IN');
+      console.log('Auth0: SIGN-IN');
       const state = await this.store.getState().take(1).toPromise();
       if (state.authIdToken && state.authUser) {
-        await this.firebaseAuthService.login(state.authIdToken, state.authUser.user_id);
+        await this.firebaseAuthService.signIn(state.authIdToken, state.authUser.user_id);
+        this.login$.next();
       }
     } else {
-      console.log('Auth0: LOG-OUT');
-      this.logout();
+      console.log('Auth0: SIGN-OUT');
+      this.signOut();
     }
   }
 

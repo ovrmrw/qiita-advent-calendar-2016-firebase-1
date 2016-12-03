@@ -1,6 +1,7 @@
 import { Dispatcher, StateReducer, NonStateReducer } from './common';
 import { User } from './types';
 import { AuthUser, FirebaseUser } from '../types';
+import { Card } from '../../app/app.types';
 // import { AUTH_ID_TOKEN, AUTH_PROFILE } from '../const';
 import {
   Action,
@@ -8,6 +9,7 @@ import {
   UpdateAuthIdTokenAction, UpdateAuthUserProfileAction, UpdateFirebaseUserProfileAction,
   RequestGraphUsersAction, ClearGraphUsersAction,
   AuthLogoutAction, FirebaseAuthLogoutAction,
+  AddCardAction, UpdateDraftCardAction,
 } from './actions';
 
 
@@ -88,3 +90,29 @@ export const graphUserStateReducer: StateReducer<User[]> =
     }, initState);
 
 
+export const cardsStateReducer: StateReducer<Card[]> =
+  (initState: Card[], dispatcher$: Dispatcher<Action>) =>
+    dispatcher$.scan<typeof initState>((state, action) => {
+      if (action instanceof AddCardAction) {
+        return [...state, action.card];
+      } else if (action instanceof AuthLogoutAction) {
+        return initState;
+      } else {
+        return state;
+      }
+    }, initState);
+
+
+export const draftCardStateReducer: StateReducer<Card | null> =
+  (initState: Card | null, dispatcher$: Dispatcher<Action>) =>
+    dispatcher$.scan<typeof initState>((state, action) => {
+      if (action instanceof UpdateDraftCardAction) {
+        return action.card;
+      } else if (action instanceof AddCardAction) {
+        return null;
+      } else if (action instanceof AuthLogoutAction) {
+        return initState;
+      } else {
+        return state;
+      }
+    }, initState);

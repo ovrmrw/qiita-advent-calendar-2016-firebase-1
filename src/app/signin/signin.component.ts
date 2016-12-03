@@ -7,14 +7,14 @@ import { Disposer } from '../../lib/class';
 
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-signin',
   template: `
-    <button class="btn btn-outline-primary btn-margin" (click)="login()" *ngIf="!isAuthed">Log In</button>
-    <button class="btn btn-outline-danger btn-margin" (click)="logout()" *ngIf="isAuthed">Log Out</button>
+    <button class="btn btn-outline-primary btn-margin" (click)="signIn()" *ngIf="!isAuthed">Sign In</button>
+    <button class="btn btn-outline-danger btn-margin" (click)="signOut()" *ngIf="isAuthed">Sign Out</button>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LoginComponent extends Disposer implements OnInit, OnDestroy {
+export class SigninComponent extends Disposer implements OnInit, OnDestroy {
   isAuthed: boolean;
 
 
@@ -41,15 +41,15 @@ export class LoginComponent extends Disposer implements OnInit, OnDestroy {
   }
 
 
-  public login(): void {
-    this.disposable = this.auth.login().subscribe(() => {
+  signIn(): void {
+    this.disposable = this.auth.signIn().subscribe(() => {
       this.router.navigate(['/secret']);
     });
   }
 
 
-  public logout(): void {
-    this.disposable = this.auth.logout().subscribe(() => {
+  signOut(): void {
+    this.disposable = this.auth.signOut().subscribe(() => {
       this.router.navigate(['/welcome']);
     });
   }

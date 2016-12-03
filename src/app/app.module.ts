@@ -7,10 +7,13 @@ import { routing } from './app.routes';
 import { AppComponent } from './app.component';
 import { WelcomeComponent } from './welcome.component';
 import { SecretComponent } from './secret.component';
-import { LoginComponent } from './login/login.component';
+import { SigninComponent } from './signin/signin.component';
+import { CardComponent, CardListComponent } from './card';
+import { CardFormComponent, CardFormService } from './card-form';
 
 import { AuthModule } from '../lib/auth';
 import { StoreModule } from '../lib/store';
+import { FunctionModule } from '../lib/functions';
 
 
 @NgModule({
@@ -18,7 +21,10 @@ import { StoreModule } from '../lib/store';
     AppComponent,
     SecretComponent,
     WelcomeComponent,
-    LoginComponent,
+    SigninComponent,
+    CardComponent,
+    CardListComponent,
+    CardFormComponent,
   ],
   imports: [
     BrowserModule,
@@ -27,8 +33,11 @@ import { StoreModule } from '../lib/store';
     routing,
     AuthModule,
     StoreModule,
+    FunctionModule,
   ],
-  providers: [],
+  providers: [
+    CardFormService,
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

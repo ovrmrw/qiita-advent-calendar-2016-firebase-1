@@ -1,5 +1,6 @@
 import { User } from './types';
 import { FirebaseUser } from '../types';
+import { Card } from '../../app/app.types';
 
 
 export class InitializeAction {
@@ -34,10 +35,19 @@ export class ClearGraphUsersAction {
   constructor() { }
 }
 
+export class AddCardAction {
+  constructor(public card: Card) { }
+}
+
+export class UpdateDraftCardAction {
+  constructor(public card: Card) { }
+}
+
 
 export type Action =
   InitializeAction |
   UpdateAuthIdTokenAction | UpdateAuthUserProfileAction | UpdateFirebaseUserProfileAction |
   AuthLogoutAction | FirebaseAuthLogoutAction |
-  RequestGraphUsersAction | ClearGraphUsersAction
+  RequestGraphUsersAction | ClearGraphUsersAction |
+  AddCardAction | UpdateDraftCardAction
   ;

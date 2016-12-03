@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Http, Headers } from '@angular/http';
+import { Http } from '@angular/http';
 import { Observable, ReplaySubject } from 'rxjs/Rx';
 import * as firebase from 'firebase';
 
 import { Store, Dispatcher, Action, FirebaseAuthLogoutAction, UpdateFirebaseUserProfileAction } from '../store';
 import { FirebaseUser } from '../types';
 import { fireauthConfig, createCustomTokenFunctionConfig as functionConfig } from './firebase-auth.config';
+import { FunctionService } from '../functions';
 
 const ENDPOINT = functionConfig.api + functionConfig.function;
 const FUNCTION_KEY = functionConfig.code;
@@ -23,20 +24,17 @@ export class FirebaseAuthService {
     private http: Http,
     private dispatcher$: Dispatcher<Action>,
     private store: Store,
+    private func: FunctionService,
   ) {
     this.stanby();
   }
 
 
-  async login(auth0IdToken: string, user_id: string): Promise<void> {
+  async signIn(auth0IdToken: string, user_id: string): Promise<void> {
     try {
-      const headers = new Headers({
-        'Authorization': 'Bearer ' + auth0IdToken,
-        'x-functions-key': FUNCTION_KEY,
-      });
-
+      const headers = await this.func.createHeaders(FUNCTION_KEY);
       const result = await this.http.post(ENDPOINT, { user_id }, { headers })
-        .timeoutWith(1000 * 60, Observable.throw('createCustomToken request is timeout.'))
+        .timeoutWith(1000 * 30, Observable.throw('createCustomToken request is timeout.'))
         .map(res => res.json().result as { customToken: string })
         .toPromise();
       console.log('createCustomToken result:', result);
@@ -47,7 +45,7 @@ export class FirebaseAuthService {
   }
 
 
-  async logout(): Promise<void> {
+  async signOut(): Promise<void> {
     try {
       await firebase.auth().signOut();
       this.dispatcher$.next(new FirebaseAuthLogoutAction());
@@ -91,5 +89,15 @@ export class FirebaseAuthService {
       throw new Error(err);
     }
   }
+
+
+  // async createHeaders(functionKey: string): Promise<Headers> {
+  //   const state = await this.store.getState().take(1).toPromise();
+  //   const headers = new Headers({
+  //     'Authorization': 'Bearer ' + state.authIdToken,
+  //     'x-functions-key': functionKey,
+  //   });
+  //   return headers;
+  // }
 
 }

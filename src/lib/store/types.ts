@@ -1,4 +1,5 @@
 import { FirebaseUser } from '../types';
+import { Card } from '../../app/app.types';
 
 
 export interface AppState {
@@ -7,6 +8,8 @@ export interface AppState {
   firebaseUser: FirebaseUser | null;
   graphUsers: User[];
   isAuthed: boolean;
+  cards: Card[];
+  draftCard: Card | null;
 }
 
 

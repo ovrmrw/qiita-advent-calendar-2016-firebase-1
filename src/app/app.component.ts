@@ -19,7 +19,7 @@ import { Disposer } from '../lib/class';
         </li>
       </ul>
       <div class="float-xs-right">
-        <app-login></app-login>
+        <app-signin></app-signin>
       </div>
     </nav>
 

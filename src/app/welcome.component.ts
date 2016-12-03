@@ -9,6 +9,10 @@ import { Disposer } from '../lib/class';
   template: `
     <h2>Welcome Page</h2>
     <div>{{loginState}}</div>
+    <div *ngIf="isAuthed">
+      <app-card-form></app-card-form>
+      <app-card-list></app-card-list>
+    </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -39,9 +43,9 @@ export class WelcomeComponent extends Disposer implements OnInit, OnDestroy {
 
   get loginState(): string {
     if (this.isAuthed) {
-      return 'ログインしています。';
+      return 'サインインしています。';
     } else {
-      return 'ログインしていません。';
+      return 'サインインしていません。';
     }
   }
 

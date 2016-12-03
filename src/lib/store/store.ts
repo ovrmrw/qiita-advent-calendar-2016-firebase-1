@@ -6,7 +6,7 @@ import { Action } from './actions';
 import { AppState } from './types';
 import {
   authIdTokenStateReducer, authUserStateReducer, firebaseUserStateReducer,
-  graphUserStateReducer,
+  graphUserStateReducer, cardsStateReducer, draftCardStateReducer,
 } from './reducers';
 
 
@@ -16,6 +16,8 @@ const initialState: AppState = {
   firebaseUser: null,
   graphUsers: [],
   isAuthed: false,
+  cards: [],
+  draftCard: null,
 };
 
 
@@ -39,10 +41,12 @@ export class Store {
         authUserStateReducer(initialState.authUser, this.dispatcher$),
         firebaseUserStateReducer(initialState.firebaseUser, this.dispatcher$),
         graphUserStateReducer(initialState.graphUsers, this.dispatcher$),
+        cardsStateReducer(initialState.cards, this.dispatcher$),
+        draftCardStateReducer(initialState.draftCard, this.dispatcher$),
 
-        (authIdToken, authUser, firebaseUser, graphUsers): AppState => {
-          const obj = { authIdToken, authUser, firebaseUser, graphUsers };
-          const isAuthed = !!authIdToken && !!authUser;
+        (authIdToken, authUser, firebaseUser, graphUsers, cards, draftCard): AppState => {
+          const obj = { authIdToken, authUser, firebaseUser, graphUsers, cards, draftCard };
+          const isAuthed = !!authIdToken && !!authUser && !!firebaseUser;
           return Object.assign<{}, AppState, {}, {}>({}, initialState, obj, { isAuthed });
         }
       ])
