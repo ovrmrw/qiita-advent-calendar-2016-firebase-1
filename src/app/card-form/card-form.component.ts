@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, AfterViewInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Rx';
 
 import { CardFormService } from './card-form.service';
@@ -10,7 +11,7 @@ import { Card } from '../app.types';
 @Component({
   selector: 'app-card-form',
   template: `
-    <form (ngSubmit)="onSubmit()" #cardForm="ngForm">
+    <form *ngIf="card" (ngSubmit)="submit()" #cardForm="ngForm">
       <div class="form-group row">
         <label for="id" class="col-xs-2 col-form-label">Title: </label>
         <div class="col-xs-10">
@@ -39,7 +40,7 @@ import { Card } from '../app.types';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardFormComponent extends Disposer implements OnInit, OnDestroy, AfterViewInit {
-  card: Card;
+  card: Card | null;
 
 
   constructor(
@@ -47,37 +48,47 @@ export class CardFormComponent extends Disposer implements OnInit, OnDestroy, Af
     private store: Store,
     private cd: ChangeDetectorRef,
     private el: ElementRef,
+    private route: ActivatedRoute,
   ) {
-    super();
+    super(cd);
   }
 
 
   ngOnInit() {
-    this.store.getState().take(1).subscribe(state => {
-      if (state.draftCard) {
+    // this.disposable = this.store.getState().subscribe(() => this.markForCheckOnNextFrame());
+
+    this.disposable = this.store.getState().subscribe(state => {
+      if (state.restore) {
         this.card = state.draftCard;
-      } else {
+      } else if (!this.card && state.draftCard) {
+        this.card = state.draftCard;
+      } else if (!this.card) {
         this.card = this.initializeCard();
       }
-      this.cd.markForCheck();
+      this.markForCheckOnNextFrame();
+      // this.cd.markForCheck();
     });
+
+    // this.disposable = this.route.params.subscribe(params => {
+    //   if (!this.card) {
+    //     this.card = Object.assign({}, this.draftCard);
+    //   } else {
+    //     this.card = this.initializeCard();
+    //   }
+    // });
 
     this.disposable = Observable.fromEvent(this.el.nativeElement, 'keyup')
       .debounceTime(100)
       .subscribe(() => {
-        this.service.saveDraftCard(this.card);
-        this.cd.markForCheck();
+        if (this.card) {
+          this.service.saveDraftCard(this.card);
+        }
       });
-
-    this.disposable = this.store.getState().subscribe(() => this.cd.markForCheck());
   }
 
 
   ngAfterViewInit() {
-    setTimeout(() => {
-      (<HTMLInputElement>(<HTMLElement>this.el.nativeElement).querySelector('input#title')).focus();
-      this.cd.markForCheck();
-    }, 0);
+    this.focus();
   }
 
 
@@ -86,15 +97,26 @@ export class CardFormComponent extends Disposer implements OnInit, OnDestroy, Af
   }
 
 
-  onSubmit() {
-    this.service.addCard(this.card);
-    this.card = this.initializeCard();
-    this.cd.markForCheck();
+  submit() {
+    if (this.card) {
+      this.service.addCard(Object.assign({}, this.card, { date: new Date().getTime() }));
+      this.card = this.initializeCard();
+      this.focus();
+    }
   }
 
 
   initializeCard(): Card {
-    return { title: '', date: new Date().getTime(), content: '' };
+    return { title: '', date: 0, content: '' };
+  }
+
+
+  focus() {
+    setTimeout(() => {
+      (<HTMLInputElement>(<HTMLElement>this.el.nativeElement).querySelector('input#title')).focus();
+      // this.cd.markForCheck();
+      this.markForCheckOnNextFrame();
+    }, 0);
   }
 
 }

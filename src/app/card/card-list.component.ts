@@ -24,14 +24,17 @@ export class CardListComponent extends Disposer implements OnInit, OnDestroy {
     private store: Store,
     private cd: ChangeDetectorRef,
   ) {
-    super();
+    super(cd);
   }
 
 
   ngOnInit() {
+    // this.disposable = this.store.getState().subscribe(() => this.markForCheckOnNextFrame());
+
     this.disposable = this.store.getState().subscribe(state => {
       this.cards = state.cards;
-      this.cd.markForCheck();
+      this.markForCheckOnNextFrame();
+      // this.cd.markForCheck();
     });
   }
 

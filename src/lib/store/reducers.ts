@@ -1,5 +1,5 @@
 import { Dispatcher, StateReducer, NonStateReducer } from './common';
-import { User } from './types';
+import { User } from './store.types';
 import { AuthUser, FirebaseUser } from '../types';
 import { Card } from '../../app/app.types';
 // import { AUTH_ID_TOKEN, AUTH_PROFILE } from '../const';
@@ -9,7 +9,7 @@ import {
   UpdateAuthIdTokenAction, UpdateAuthUserProfileAction, UpdateFirebaseUserProfileAction,
   RequestGraphUsersAction, ClearGraphUsersAction,
   AuthLogoutAction, FirebaseAuthLogoutAction,
-  AddCardAction, UpdateDraftCardAction,
+  AddCardAction, UpdateDraftCardAction, RestoreAction,
 } from './actions';
 
 
@@ -23,12 +23,13 @@ export const authIdTokenStateReducer: StateReducer<string | null> =
       if (action instanceof InitializeAction) {
         return localStorage.getItem(AUTH_ID_TOKEN);
       } else if (action instanceof UpdateAuthIdTokenAction) {
-        if (action.idToken) {
-          localStorage.setItem(AUTH_ID_TOKEN, action.idToken);
+        const idToken = action.idToken;
+        if (idToken) {
+          localStorage.setItem(AUTH_ID_TOKEN, idToken);
         } else {
           localStorage.removeItem(AUTH_ID_TOKEN);
         }
-        return action.idToken;
+        return idToken;
       } else if (action instanceof AuthLogoutAction) {
         localStorage.removeItem(AUTH_ID_TOKEN);
         return initState;
@@ -42,7 +43,7 @@ export const authUserStateReducer: StateReducer<AuthUser | null> =
   (initState: AuthUser | null, dispatcher$: Dispatcher<Action>) =>
     dispatcher$.scan<typeof initState>((state, action) => {
       if (action instanceof InitializeAction) {
-        const profile: string = localStorage.getItem(AUTH_PROFILE);
+        const profile: string | null = localStorage.getItem(AUTH_PROFILE);
         if (profile) {
           return JSON.parse(profile);
         } else {
@@ -97,6 +98,8 @@ export const cardsStateReducer: StateReducer<Card[]> =
         return [...state, action.card];
       } else if (action instanceof AuthLogoutAction) {
         return initState;
+      } else if (action instanceof RestoreAction) {
+        return action.cloudState.cards || [];
       } else {
         return state;
       }
@@ -112,6 +115,30 @@ export const draftCardStateReducer: StateReducer<Card | null> =
         return null;
       } else if (action instanceof AuthLogoutAction) {
         return initState;
+      } else if (action instanceof RestoreAction) {
+        return action.cloudState.draftCard || null;
+      } else {
+        return state;
+      }
+    }, initState);
+
+
+export const restoreStateMapper: NonStateReducer<boolean> =
+  (dispatcher$: Dispatcher<Action>) =>
+    dispatcher$.map(action => {
+      if (action instanceof RestoreAction) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+
+
+export const afterRestoredStateReducer: StateReducer<boolean> =
+  (initState: boolean, dispatcher$: Dispatcher<Action>) =>
+    dispatcher$.scan<typeof initState>((state, action) => {
+      if (action instanceof RestoreAction) {
+        return true;
       } else {
         return state;
       }

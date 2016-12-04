@@ -11,7 +11,7 @@ import {
 } from '../store';
 
 import { FirebaseAuthService } from './firebase-auth.service';
-import { auth0Config as config } from './auth.config';
+import { auth0Config as config } from '../../config';
 // import { AUTH_ID_TOKEN, AUTH_PROFILE, WELCOME_PAGE, AppKind } from '../const';
 
 
@@ -50,7 +50,7 @@ export class AuthService {
         // await this.updateAuthenticatedState();
 
         this.lock.getProfile(authResult.idToken, async (err, profile) => {
-          if (err) { throw err; }          
+          if (err) { throw err; }
           this.dispatcher$.next(new UpdateAuthUserProfileAction(profile));
           await this.updateAuthenticatedState();
         });
@@ -74,11 +74,14 @@ export class AuthService {
   private async updateAuthenticatedState(): Promise<void> {
     if (this.authenticated()) {
       console.log('Auth0: SIGN-IN');
-      const state = await this.store.getState().take(1).toPromise();
-      if (state.authIdToken && state.authUser) {
-        await this.firebaseAuthService.signIn(state.authIdToken, state.authUser.user_id);
-        this.login$.next();
-      }
+      // const state = await this.store.getState().take(1).toPromise();
+      this.store.getState().take(1).subscribe(async (state) => {
+        console.log('state:', state);
+        if (state.authIdToken && state.authUser) {
+          await this.firebaseAuthService.signIn(state.authIdToken, state.authUser.user_id);
+          this.login$.next();
+        }
+      });
     } else {
       console.log('Auth0: SIGN-OUT');
       this.signOut();

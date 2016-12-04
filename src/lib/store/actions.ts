@@ -1,4 +1,4 @@
-import { User } from './types';
+import { AppState, User } from './store.types';
 import { FirebaseUser } from '../types';
 import { Card } from '../../app/app.types';
 
@@ -43,11 +43,16 @@ export class UpdateDraftCardAction {
   constructor(public card: Card) { }
 }
 
+export class RestoreAction {
+  constructor(public cloudState: AppState) { }
+}
+
 
 export type Action =
   InitializeAction |
   UpdateAuthIdTokenAction | UpdateAuthUserProfileAction | UpdateFirebaseUserProfileAction |
   AuthLogoutAction | FirebaseAuthLogoutAction |
   RequestGraphUsersAction | ClearGraphUsersAction |
-  AddCardAction | UpdateDraftCardAction
+  AddCardAction | UpdateDraftCardAction |
+  RestoreAction
   ;

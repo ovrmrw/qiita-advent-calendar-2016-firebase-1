@@ -11,7 +11,7 @@ export class FunctionService {
   ) { }
 
 
-  async createHeaders(functionKey: string): Promise<Headers> {
+  async createHeaders(functionKey?: string): Promise<Headers> {
     const state = await this.store.getState().take(1).toPromise();
     const headers = new Headers({
       'Authorization': state.authIdToken ? 'Bearer ' + state.authIdToken : '',

@@ -5,19 +5,15 @@ import * as firebase from 'firebase';
 
 import { Store, Dispatcher, Action, FirebaseAuthLogoutAction, UpdateFirebaseUserProfileAction } from '../store';
 import { FirebaseUser } from '../types';
-import { fireauthConfig, createCustomTokenFunctionConfig as functionConfig } from './firebase-auth.config';
+import { firebaseConfig, azureFunctionsConfig as functionConfig } from '../../config';
 import { FunctionService } from '../functions';
 
-const ENDPOINT = functionConfig.api + functionConfig.function;
-const FUNCTION_KEY = functionConfig.code;
-
-
-firebase.initializeApp(fireauthConfig);
+const endpointCreateCustomToken = functionConfig.api + functionConfig.function + 'createCustomToken';
 
 
 @Injectable()
 export class FirebaseAuthService {
-  readonly firebaseCurrentUser$ = new ReplaySubject<FirebaseUser | null>();
+  // firebaseApp: firebase.app.App;
 
 
   constructor(
@@ -26,16 +22,37 @@ export class FirebaseAuthService {
     private store: Store,
     private func: FunctionService,
   ) {
+    firebase.initializeApp(firebaseConfig);
     this.stanby();
   }
 
 
+  stanby(): void {
+    firebase.auth().onAuthStateChanged((user: FirebaseUser) => {
+      if (user) {
+        console.log('Firebase Auth: SIGN-IN');
+        this.dispatcher$.next(new UpdateFirebaseUserProfileAction(user));
+        this.store.getState().take(1).subscribe(async (state) => {
+          if (state.authUser) {
+            await this.writeUserProfile(state.authUser, user);
+            console.log('writeUserProfile is successed.');
+          }
+        });
+      } else {
+        console.log('Firebase Auth: SIGN-OUT');
+        this.dispatcher$.next(new UpdateFirebaseUserProfileAction(null));
+      }
+    });
+  }
+
+
   async signIn(auth0IdToken: string, user_id: string): Promise<void> {
+    console.log('FirebaseAuth signIn method')
     try {
-      const headers = await this.func.createHeaders(FUNCTION_KEY);
-      const result = await this.http.post(ENDPOINT, { user_id }, { headers })
+      const headers = await this.func.createHeaders();
+      const result = await this.http.post(endpointCreateCustomToken, { user_id }, { headers })
         .timeoutWith(1000 * 30, Observable.throw('createCustomToken request is timeout.'))
-        .map(res => res.json().result as { customToken: string })
+        .map(res => res.json() as { customToken: string })
         .toPromise();
       console.log('createCustomToken result:', result);
       await firebase.auth().signInWithCustomToken(result.customToken);
@@ -55,25 +72,6 @@ export class FirebaseAuthService {
   }
 
 
-  stanby(): void {
-    firebase.auth().onAuthStateChanged((user: FirebaseUser) => {
-      if (user) {
-        console.log('Firebase Auth: LOG-IN');
-        this.dispatcher$.next(new UpdateFirebaseUserProfileAction(user));
-        this.store.getState().take(1).subscribe(async (state) => {
-          if (state.authUser) {
-            await this.writeUserProfile(state.authUser, user);
-            console.log('writeUserProfile is successed.');
-          }
-        });
-      } else {
-        console.log('Firebase Auth: LOG-OUT');
-        this.dispatcher$.next(new UpdateFirebaseUserProfileAction(null));
-      }
-    });
-  }
-
-
   async writeUserProfile(auth0UserProfile: Auth0UserProfile, firebaseUser: firebase.User): Promise<void> {
     try {
       const user = firebase.auth().currentUser;
@@ -89,15 +87,5 @@ export class FirebaseAuthService {
       throw new Error(err);
     }
   }
-
-
-  // async createHeaders(functionKey: string): Promise<Headers> {
-  //   const state = await this.store.getState().take(1).toPromise();
-  //   const headers = new Headers({
-  //     'Authorization': 'Bearer ' + state.authIdToken,
-  //     'x-functions-key': functionKey,
-  //   });
-  //   return headers;
-  // }
 
 }

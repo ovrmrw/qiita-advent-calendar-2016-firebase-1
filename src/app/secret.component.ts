@@ -21,14 +21,18 @@ export class SecretComponent extends Disposer implements OnInit, OnDestroy {
     private store: Store,
     private cd: ChangeDetectorRef,
   ) {
-    super();
+    super(cd);
   }
 
 
   ngOnInit() {
+    // this.disposable = this.store.getState().subscribe(() => this.markForCheckOnNextFrame());
+
     this.disposable = this.store.getState().subscribe(state => {
       this.userProfile = state.authUser;
-      this.cd.markForCheck();
+          // this.cd.markForCheck();
+          this.markForCheckOnNextFrame();
+
     });
   }
 

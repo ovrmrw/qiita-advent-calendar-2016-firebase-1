@@ -6,9 +6,9 @@ import { Card } from '../app.types';
 @Component({
   selector: 'app-card',
   template: `
-    <div>{{card.title}}</div>
-    <div>{{card.date}}</div>
-    <div>{{card.content}}</div>  
+    <div>Title: {{card.title}}</div>
+    <div>Date: {{card.date}}</div>
+    <div>Content: {{card.content}}</div>  
   `,
 })
 export class CardComponent {

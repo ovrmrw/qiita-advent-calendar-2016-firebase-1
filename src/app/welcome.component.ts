@@ -9,6 +9,8 @@ import { Disposer } from '../lib/class';
   template: `
     <h2>Welcome Page</h2>
     <div>{{loginState}}</div>
+    <div>{{restoreState}}</div>
+    <hr />
     <div *ngIf="isAuthed">
       <app-card-form></app-card-form>
       <app-card-list></app-card-list>
@@ -18,20 +20,26 @@ import { Disposer } from '../lib/class';
 })
 export class WelcomeComponent extends Disposer implements OnInit, OnDestroy {
   isAuthed: boolean;
+  afterRestore: boolean;
 
 
   constructor(
     private store: Store,
     private cd: ChangeDetectorRef,
   ) {
-    super();
+    super(cd);
   }
 
 
   ngOnInit() {
+    // this.disposable = this.store.getState().subscribe(() => this.markForCheckOnNextFrame());
+
     this.disposable = this.store.getState().subscribe(state => {
       this.isAuthed = state.isAuthed;
-      this.cd.markForCheck();
+      this.afterRestore = state.afterRestored;
+      // this.cd.markForCheck();
+      this.markForCheckOnNextFrame();
+
     });
   }
 
@@ -43,9 +51,18 @@ export class WelcomeComponent extends Disposer implements OnInit, OnDestroy {
 
   get loginState(): string {
     if (this.isAuthed) {
-      return 'サインインしています。';
+      return 'Sign In OK.';
     } else {
-      return 'サインインしていません。';
+      return '----------';
+    }
+  }
+
+
+  get restoreState(): string {
+    if (this.afterRestore) {
+      return 'Restore OK.';
+    } else {
+      return '----------';
     }
   }
 

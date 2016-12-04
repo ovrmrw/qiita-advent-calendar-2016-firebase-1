@@ -1,5 +1,5 @@
 export * from './actions';
-export * from './types';
+export * from './store.types';
 export { Dispatcher } from './common';
 export { Store } from './store';
-export { StoreModule } from './module';
+export { StoreModule } from './store.module';
