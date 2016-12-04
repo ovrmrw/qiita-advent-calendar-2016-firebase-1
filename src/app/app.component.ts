@@ -8,7 +8,7 @@ import { Disposer } from '../lib/class';
   selector: 'app-root',
   template: `  
     <nav class="navbar navbar-light bg-faded">
-      <a class="navbar-brand" href="#">(Auth0 - Angular 2)</a>
+      <!--<a class="navbar-brand" href="#">(Auth0 - Angular 2)</a>-->
       <ul class="nav navbar-nav">
         <li class="nav-item" routerLinkActive="active">
           <a class="nav-link" [routerLink]="['/welcome']">Welcome</a>
@@ -40,13 +40,10 @@ export class AppComponent extends Disposer implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    // this.disposable = this.store.getState().subscribe(() => this.markForCheckOnNextFrame());
-
     this.disposable = this.store.getState().subscribe(state => {
       this.isAuthed = state.isAuthed;
-          // this.cd.markForCheck();
-          this.markForCheckOnNextFrame();
-
+      // this.cd.markForCheck();
+      this.markForCheckOnNextFrame();
     });
   }
 

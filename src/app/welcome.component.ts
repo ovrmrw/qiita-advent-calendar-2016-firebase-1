@@ -8,9 +8,11 @@ import { Disposer } from '../lib/class';
   selector: 'app-welcome',
   template: `
     <h2>Welcome Page</h2>
-    <div>{{loginState}}</div>
+    <div>{{auth0LoginState}}</div>
+    <div>{{firebaseLoginState}}</div>
     <div>{{restoreState}}</div>
     <hr />
+    <div *ngIf="!authUser">サインインしてください。</div>
     <div *ngIf="isAuthed">
       <app-card-form></app-card-form>
       <app-card-list></app-card-list>
@@ -20,6 +22,8 @@ import { Disposer } from '../lib/class';
 })
 export class WelcomeComponent extends Disposer implements OnInit, OnDestroy {
   isAuthed: boolean;
+  authUser: any;
+  firebaseUser: any;
   afterRestore: boolean;
 
 
@@ -32,14 +36,13 @@ export class WelcomeComponent extends Disposer implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    // this.disposable = this.store.getState().subscribe(() => this.markForCheckOnNextFrame());
-
     this.disposable = this.store.getState().subscribe(state => {
       this.isAuthed = state.isAuthed;
+      this.authUser = state.authUser;
+      this.firebaseUser = state.firebaseUser;
       this.afterRestore = state.afterRestored;
       // this.cd.markForCheck();
       this.markForCheckOnNextFrame();
-
     });
   }
 
@@ -49,9 +52,18 @@ export class WelcomeComponent extends Disposer implements OnInit, OnDestroy {
   }
 
 
-  get loginState(): string {
-    if (this.isAuthed) {
-      return 'Sign In OK.';
+  get auth0LoginState(): string {
+    if (this.authUser) {
+      return 'Auth0 Autentication -> OK.';
+    } else {
+      return '----------';
+    }
+  }
+
+
+  get firebaseLoginState(): string {
+    if (this.firebaseUser) {
+      return 'Firebae-Auth Autentication -> OK.';
     } else {
       return '----------';
     }
@@ -60,7 +72,7 @@ export class WelcomeComponent extends Disposer implements OnInit, OnDestroy {
 
   get restoreState(): string {
     if (this.afterRestore) {
-      return 'Restore OK.';
+      return 'Restore from Firebase-DB -> OK.';
     } else {
       return '----------';
     }

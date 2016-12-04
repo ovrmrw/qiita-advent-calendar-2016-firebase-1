@@ -55,8 +55,6 @@ export class CardFormComponent extends Disposer implements OnInit, OnDestroy, Af
 
 
   ngOnInit() {
-    // this.disposable = this.store.getState().subscribe(() => this.markForCheckOnNextFrame());
-
     this.disposable = this.store.getState().subscribe(state => {
       if (state.restore) {
         this.card = state.draftCard;

@@ -139,6 +139,8 @@ export const afterRestoredStateReducer: StateReducer<boolean> =
     dispatcher$.scan<typeof initState>((state, action) => {
       if (action instanceof RestoreAction) {
         return true;
+      } else if (action instanceof AuthLogoutAction) {
+        return initState;
       } else {
         return state;
       }

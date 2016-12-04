@@ -29,8 +29,6 @@ export class SigninComponent extends Disposer implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    // this.disposable = this.store.getState().subscribe(() => this.markForCheckOnNextFrame());
-
     this.disposable = this.store.getState().subscribe(state => {
       this.isAuthed = state.isAuthed;
       // this.cd.markForCheck();
@@ -46,14 +44,14 @@ export class SigninComponent extends Disposer implements OnInit, OnDestroy {
 
   signIn(): void {
     this.disposable = this.auth.signIn().subscribe(() => {
-      this.router.navigate(['/secret']);
+      // this.router.navigate(['/secret']);
     });
   }
 
 
   signOut(): void {
     this.disposable = this.auth.signOut().subscribe(() => {
-      this.router.navigate(['/welcome']);
+      this.router.navigate(['/']);
       window.location.reload();
     });
   }
