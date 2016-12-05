@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 
-import { Store } from '../lib/store';
-import { Disposer } from '../lib/class';
+import { Store } from '../../lib/store';
+import { Disposer } from '../../lib/class';
 
 
 @Component({
@@ -10,11 +10,10 @@ import { Disposer } from '../lib/class';
     <h2>Welcome Page</h2>
     <div>{{auth0LoginState}}</div>
     <div>{{firebaseLoginState}}</div>
-    <div>{{restoreState}}</div>
-    <hr />
+    <div>{{restoreState}}</div>    
     <div *ngIf="!authUser">サインインしてください。</div>
-    <div *ngIf="isAuthed">
-      <app-card-form></app-card-form>
+    <div *ngIf="afterRestore">
+      <hr />
       <app-card-list></app-card-list>
     </div>
   `,
@@ -54,7 +53,7 @@ export class WelcomeComponent extends Disposer implements OnInit, OnDestroy {
 
   get auth0LoginState(): string {
     if (this.authUser) {
-      return 'Auth0 Autentication -> OK.';
+      return 'Auth0 Autentication -> OK';
     } else {
       return '----------';
     }
@@ -63,7 +62,7 @@ export class WelcomeComponent extends Disposer implements OnInit, OnDestroy {
 
   get firebaseLoginState(): string {
     if (this.firebaseUser) {
-      return 'Firebae-Auth Autentication -> OK.';
+      return 'Firebase-Auth Autentication -> OK';
     } else {
       return '----------';
     }
@@ -72,7 +71,7 @@ export class WelcomeComponent extends Disposer implements OnInit, OnDestroy {
 
   get restoreState(): string {
     if (this.afterRestore) {
-      return 'Restore from Firebase-DB -> OK.';
+      return 'Restore from Firebase-DB -> OK';
     } else {
       return '----------';
     }

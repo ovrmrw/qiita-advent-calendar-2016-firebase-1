@@ -1,4 +1,4 @@
-import { ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, NgZone } from '@angular/core';
 import { Subscription } from 'rxjs/Rx';
 
 
@@ -20,10 +20,12 @@ export abstract class Disposer {
 
 
   markForCheckOnNextFrame(): void {
+    // console.log('inside markForCheckOnNextFrame:', NgZone.isInAngularZone());
     requestAnimationFrame(() => {
+      console.log('inside markForCheckOnNextFrame requestAnimationFrame:', NgZone.isInAngularZone());
       if (this.__cd) {
         this.__cd.markForCheck();
-        this.__cd.detectChanges();
+        // this.__cd.detectChanges();
       } else {
         console.error('Disposer doesn\' have a memory reference for ChangeDetectorRef.');
       }

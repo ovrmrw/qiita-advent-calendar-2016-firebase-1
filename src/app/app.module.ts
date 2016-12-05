@@ -5,10 +5,11 @@ import { HttpModule } from '@angular/http';
 
 import { routing } from './app.routes';
 import { AppComponent } from './app.component';
-import { WelcomeComponent } from './welcome.component';
-import { SecretComponent } from './secret.component';
+import { WelcomeComponent } from './welcome';
+import { SecretComponent } from './secret';
 import { SigninComponent } from './signin/signin.component';
-import { CardComponent, CardListComponent } from './card';
+import { CardDeckComponent } from './card-deck';
+import { CardListComponent, CardComponent } from './card-list';
 import { CardFormComponent, CardFormService } from './card-form';
 
 import { AuthModule } from '../lib/auth';
@@ -22,6 +23,7 @@ import { FunctionModule } from '../lib/functions';
     SecretComponent,
     WelcomeComponent,
     SigninComponent,
+    CardDeckComponent,
     CardComponent,
     CardListComponent,
     CardFormComponent,

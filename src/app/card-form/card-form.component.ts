@@ -41,6 +41,7 @@ import { Card } from '../app.types';
 })
 export class CardFormComponent extends Disposer implements OnInit, OnDestroy, AfterViewInit {
   card: Card | null;
+  isAfterViewInit: boolean = false;
 
 
   constructor(
@@ -56,27 +57,21 @@ export class CardFormComponent extends Disposer implements OnInit, OnDestroy, Af
 
   ngOnInit() {
     this.disposable = this.store.getState().subscribe(state => {
-      if (state.restore) {
+      if (state.restore && state.draftCard) {
         this.card = state.draftCard;
+        this.focus();
       } else if (!this.card && state.draftCard) {
         this.card = state.draftCard;
       } else if (!this.card) {
         this.card = this.initializeCard();
+        this.focus();
       }
       this.markForCheckOnNextFrame();
       // this.cd.markForCheck();
     });
 
-    // this.disposable = this.route.params.subscribe(params => {
-    //   if (!this.card) {
-    //     this.card = Object.assign({}, this.draftCard);
-    //   } else {
-    //     this.card = this.initializeCard();
-    //   }
-    // });
-
     this.disposable = Observable.fromEvent(this.el.nativeElement, 'keyup')
-      .debounceTime(100)
+      .debounceTime(200)
       .subscribe(() => {
         if (this.card) {
           this.service.saveDraftCard(this.card);
@@ -86,7 +81,7 @@ export class CardFormComponent extends Disposer implements OnInit, OnDestroy, Af
 
 
   ngAfterViewInit() {
-    this.focus();
+    this.isAfterViewInit = true;
   }
 
 
@@ -99,7 +94,6 @@ export class CardFormComponent extends Disposer implements OnInit, OnDestroy, Af
     if (this.card) {
       this.service.addCard(Object.assign({}, this.card, { date: new Date().getTime() }));
       this.card = this.initializeCard();
-      this.focus();
     }
   }
 
@@ -110,11 +104,9 @@ export class CardFormComponent extends Disposer implements OnInit, OnDestroy, Af
 
 
   focus() {
-    setTimeout(() => {
+    if (this.isAfterViewInit) {
       (<HTMLInputElement>(<HTMLElement>this.el.nativeElement).querySelector('input#title')).focus();
-      // this.cd.markForCheck();
-      this.markForCheckOnNextFrame();
-    }, 0);
+    }
   }
 
 }

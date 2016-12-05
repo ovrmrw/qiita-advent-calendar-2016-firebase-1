@@ -1,20 +1,23 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 
-import { Store } from '../lib/store';
-import { Disposer } from '../lib/class';
+import { Store } from '../../lib/store';
+import { Disposer } from '../../lib/class';
 
 
 @Component({
-  selector: 'app-secret',
+  selector: 'app-card-deck',
   template: `
-    <h2>Secret Page</h2>
-    <hr />
-    <pre>{{userProfile | json}}</pre>
+    <h2>Card Deck</h2>
+    <div *ngIf="isAuthed">
+      <hr />
+      <app-card-form></app-card-form>
+      <app-card-list></app-card-list>
+    </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SecretComponent extends Disposer implements OnInit, OnDestroy {
-  userProfile: any;
+export class CardDeckComponent extends Disposer implements OnInit, OnDestroy {
+  isAuthed: boolean;
 
 
   constructor(
@@ -27,7 +30,7 @@ export class SecretComponent extends Disposer implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.disposable = this.store.getState().subscribe(state => {
-      this.userProfile = state.authUser;
+      this.isAuthed = state.isAuthed;
       // this.cd.markForCheck();
       this.markForCheckOnNextFrame();
     });

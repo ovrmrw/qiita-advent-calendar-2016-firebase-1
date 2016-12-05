@@ -33,7 +33,7 @@ export class FirebaseEffector {
         subject.next(val);
       }
     });
-    return subject.asObservable();
+    return subject;
   }
 
 

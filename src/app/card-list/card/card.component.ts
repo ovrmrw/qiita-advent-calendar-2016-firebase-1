@@ -1,6 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
-import { Card } from '../app.types';
+import { Card } from '../../app.types';
 
 
 @Component({
@@ -10,6 +10,7 @@ import { Card } from '../app.types';
     <div>Date: {{card.date}}</div>
     <div>Content: {{card.content}}</div>  
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardComponent {
   @Input() card: Card;

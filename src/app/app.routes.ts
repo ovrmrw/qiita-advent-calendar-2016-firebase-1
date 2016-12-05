@@ -2,9 +2,10 @@ import { ModuleWithProviders } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 // import { AppComponent } from './app.component';
-import { WelcomeComponent } from './welcome.component';
-import { SecretComponent } from './secret.component';
-import { AuthGuard } from '../lib/auth';
+import { WelcomeComponent } from './welcome';
+import { SecretComponent } from './secret';
+import { CardDeckComponent } from './card-deck';
+import { AuthGuard } from '../lib/guard';
 
 
 const appRoutes: Routes = [
@@ -16,6 +17,11 @@ const appRoutes: Routes = [
   {
     path: 'welcome',
     component: WelcomeComponent
+  },
+  {
+    path: 'card-deck',
+    component: CardDeckComponent,
+    canActivate: [AuthGuard]
   },
   {
     path: 'secret',

@@ -1,4 +1,4 @@
-import { Injectable, Inject, Optional } from '@angular/core';
+import { Injectable, Inject, Optional, NgZone } from '@angular/core';
 import { Observable, BehaviorSubject, ReplaySubject, Subject } from 'rxjs/Rx';
 
 import { FirebaseEffector } from './firebase-effector';
@@ -36,6 +36,7 @@ export class Store {
 
 
   constructor(
+    private zone: NgZone,
     private dispatcher$: Dispatcher<Action>,
     @Inject(FirebaseEffector) @Optional()
     private firebaseEffector: FirebaseEffector | null,
@@ -68,9 +69,16 @@ export class Store {
       ])
       .subscribe(newState => {
         console.log('newState:', newState);
-        this.provider$.next(newState);
-        this.firebaseEffectorTrigger$.next(newState);
+        this.zone.run(() => {
+          this.provider$.next(newState);
+        });
+        this.effectAfterReduced(newState);
       });
+  }
+
+
+  private effectAfterReduced(state: AppState): void {
+    this.firebaseEffectorTrigger$.next(state);
   }
 
 
@@ -79,15 +87,14 @@ export class Store {
       /* Firebase Inbound */
       this.firebaseEffectorTrigger$
         .distinctUntilChanged((oldState, newState) => oldState.uid === newState.uid)
-        .filter(state => !!state.uid)
         .do(() => this.firebaseRestoreFinished$.next(false))
+        .filter(state => !!state.uid)
         .subscribe(state => {
           if (this.firebaseEffector) {
             this.firebaseEffector.connect$<AppState>('store/' + state.uid)
               .take(1)
               .subscribe(cloudState => {
-                console.log('============================= firebase inbound')
-                console.log('state:', cloudState)
+                console.log('============================= Firebase Inbound');
                 if (cloudState) {
                   this.dispatcher$.next(new RestoreAction(cloudState));
                 } else {
@@ -101,13 +108,14 @@ export class Store {
 
       /* Firebase Outbound */
       this.firebaseEffectorTrigger$
-        .combineLatest(this.firebaseRestoreFinished$)
-        .filter(values => values[1] && !!values[0].uid && !values[0].restore) /* RestoreActionではない場合のみFirebaseに書き込みする。 */
-        .map(values => values[0])
+        .combineLatest(this.firebaseRestoreFinished$, (state, afterRestored) => {
+          return { state, afterRestored };
+        })
+        .filter(obj => obj.afterRestored && !!obj.state.uid && !obj.state.restore) /* RestoreActionではない場合のみFirebaseに書き込みする。 */
+        .map(obj => obj.state)
         .debounceTime(200)
         .subscribe(state => {
-          console.log('============================= firebase outbound')
-          console.log('state:', state);
+          console.log('============================= Firebase Outbound');
           if (this.firebaseEffector) {
             this.firebaseEffector.saveCurrentState('store/' + state.uid, state);
           }

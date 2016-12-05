@@ -76,7 +76,6 @@ export class AuthService {
       console.log('Auth0: SIGN-IN');
       // const state = await this.store.getState().take(1).toPromise();
       this.store.getState().take(1).subscribe(async (state) => {
-        console.log('state:', state);
         if (state.authIdToken && state.authUser) {
           await this.firebaseAuthService.signIn(state.authIdToken, state.authUser.user_id);
           this.login$.next();

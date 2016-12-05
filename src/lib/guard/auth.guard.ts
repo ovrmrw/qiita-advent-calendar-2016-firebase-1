@@ -1,18 +1,26 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, forwardRef } from '@angular/core';
 import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { AuthService } from './auth.service';
+import { Store } from '../store';
 
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+  isAuthed: boolean = false;
+
+
   constructor(
     private router: Router,
-    private auth: AuthService,
-  ) { }
+    @Inject(forwardRef(() => Store))
+    private store: Store,
+  ) {
+    this.store.getState().subscribe(state => {
+      this.isAuthed = !!state.authIdToken;
+    });
+  }
 
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    if (this.auth.authenticated()) {
+    if (this.isAuthed) {
       return true;
     } else {
       this.router.navigate(['/welcome']);

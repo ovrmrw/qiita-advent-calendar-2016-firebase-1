@@ -14,6 +14,10 @@ import { Disposer } from '../lib/class';
           <a class="nav-link" [routerLink]="['/welcome']">Welcome</a>
         </li>
         <li class="nav-item" routerLinkActive="active">
+          <a class="nav-link" [routerLink]="['/card-deck']" *ngIf="isAuthed">Card-Deck</a>
+          <a class="nav-link" [routerLink]="['/card-deck']" *ngIf="!isAuthed"><s>Card-Deck</s></a>
+        </li>
+        <li class="nav-item" routerLinkActive="active">
           <a class="nav-link" [routerLink]="['/secret']" *ngIf="isAuthed">Secret</a>
           <a class="nav-link" [routerLink]="['/secret']" *ngIf="!isAuthed"><s>Secret</s></a>
         </li>

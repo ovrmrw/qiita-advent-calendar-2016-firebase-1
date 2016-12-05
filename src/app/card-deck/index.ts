@@ -1,0 +1,1 @@
+export { CardDeckComponent } from './card-deck.component';
