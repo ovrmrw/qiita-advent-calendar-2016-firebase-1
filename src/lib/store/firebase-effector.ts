@@ -1,4 +1,4 @@
-import { Injectable, Inject, forwardRef } from '@angular/core';
+import { Injectable, Inject, forwardRef, NgZone } from '@angular/core';
 import { Observable, Subject } from 'rxjs/Rx';
 import * as firebase from 'firebase';
 
@@ -10,7 +10,9 @@ export class FirebaseEffector {
   // firebaseApp: firebase.app.App;
 
 
-  constructor() { }
+  constructor(
+    private zone: NgZone,
+  ) { }
 
 
   saveCurrentState<T>(refPath: string, resolvedState: T, deletePropNames: string[] = []): void {
@@ -28,12 +30,15 @@ export class FirebaseEffector {
   connect$<T>(refPath: string): Observable<T> {
     const subject = new Subject<T>();
     firebase.database().ref(refPath).once('value', snapshot => {
-      if (snapshot) {
-        const val = snapshot.val() as T;
-        subject.next(val);
-      }
+      this.zone.run(() => { // Zoneが捕捉できるようにするためにzone.runでラップしている。
+        if (snapshot) {
+          const val = snapshot.val() as T;
+          subject.next(val);
+        }
+      });
     });
-    return subject.delay(1); // Zoneが捕捉できるようにするために敢えてdelayを挟んでいる。
+    // return subject.delay(1); // Zoneが捕捉できるようにするために敢えてdelayを挟んでいる。
+    return subject;
   }
 
 
