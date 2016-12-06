@@ -61,7 +61,7 @@ export class Store {
 
         (authIdToken, authUser, firebaseUser, graphUsers, cards, draftCard, restore, afterRestored): AppState => {
           const obj = { authIdToken, authUser, firebaseUser, graphUsers, cards, draftCard, restore, afterRestored };
-          const isAuthed = !!authIdToken && !!authUser && !!firebaseUser;
+          const isAuthed: boolean = !!authIdToken && !!authUser && !!firebaseUser;
           const uid: string = authUser && firebaseUser && authUser.user_id === firebaseUser.uid ? firebaseUser.uid : '';
           console.log('uid:', uid);
           return Object.assign<{}, AppState, {}, {}>({}, initialState, obj, { isAuthed, uid });
@@ -69,9 +69,9 @@ export class Store {
       ])
       .subscribe(newState => {
         console.log('newState:', newState);
-        this.zone.run(() => {
-          this.provider$.next(newState);
-        });
+        // this.zone.run(() => {
+        this.provider$.next(newState);
+        // });
         this.effectAfterReduced(newState);
       });
   }
@@ -84,8 +84,9 @@ export class Store {
 
   private applyEffectors(): void {
     if (this.firebaseEffector) {
-      /* Firebase Inbound */
+      /* Firebase Inbound (初回ログイン時にFirebaseからデータを取得する) */
       this.firebaseEffectorTrigger$
+        // .filter(() => false) // 一時的にInboundを止める。
         .distinctUntilChanged((oldState, newState) => oldState.uid === newState.uid)
         .do(() => this.firebaseRestoreFinished$.next(false))
         .filter(state => !!state.uid)
@@ -106,12 +107,14 @@ export class Store {
           }
         });
 
-      /* Firebase Outbound */
+      /* Firebase Outbound (データ更新毎にFirebaseへ保存する) */
       this.firebaseEffectorTrigger$
+        // .filter(() => false) // 一時的にOutboundを止める。
         .combineLatest(this.firebaseRestoreFinished$, (state, afterRestored) => {
           return { state, afterRestored };
         })
-        .filter(obj => obj.afterRestored && !!obj.state.uid && !obj.state.restore) /* RestoreActionではない場合のみFirebaseに書き込みする。 */
+        .filter(obj => obj.afterRestored) // RestoreAction発行済みの場合は通過する。
+        .filter(obj => !!obj.state.uid && !obj.state.restore) // RestoreActionではない場合のみ通過する。
         .map(obj => obj.state)
         .debounceTime(200)
         .subscribe(state => {

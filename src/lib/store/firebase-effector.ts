@@ -33,7 +33,7 @@ export class FirebaseEffector {
         subject.next(val);
       }
     });
-    return subject;
+    return subject.delay(1); // Zoneが捕捉できるようにするために敢えてdelayを挟んでいる。
   }
 
 
