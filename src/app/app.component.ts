@@ -48,8 +48,8 @@ export class AppComponent extends Disposer implements OnInit, OnDestroy {
   ngOnInit() {
     this.disposable = this.store.getState().subscribe(state => {
       this.isAuthed = state.isAuthed;
-      // this.cd.markForCheck();
-      this.markForCheckOnNextFrame();
+      this.cd.markForCheck();
+      // this.markForCheckOnNextFrame();
     });
   }
 

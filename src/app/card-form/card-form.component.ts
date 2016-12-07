@@ -66,8 +66,8 @@ export class CardFormComponent extends Disposer implements OnInit, OnDestroy, Af
         this.card = this.initializeCard();
         this.focus();
       }
-      this.markForCheckOnNextFrame();
-      // this.cd.markForCheck();
+      // this.markForCheckOnNextFrame();
+      this.cd.markForCheck();
     });
 
     this.disposable = Observable.fromEvent(this.el.nativeElement, 'keyup')

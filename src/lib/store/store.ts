@@ -47,7 +47,7 @@ export class Store {
     this.dispatcherQueue$ = // DispatcherではなくDispatcherQueueをReducerに代入する。
       this.dispatcher$
         .concat() // Actionを発行順に処理する。
-        .timeoutWith(1000 * 20, Observable.throw('Async action is too much long.')) as Dispatcher<Action>; // 指定時間を超える非同期処理は例外スローさせる。
+        .share() as Dispatcher<Action>;
 
     this.provider$ = new BehaviorSubject<AppState>(initialState);
     this.combineReducers();
@@ -92,24 +92,24 @@ export class Store {
 
   private applyEffectors(): void {
     if (this.firebaseEffector) {
+      const inboundCanceller$ = new Subject<void>();
+
       /* Firebase Inbound (Firebaseからデータを取得する) */
       this.firebaseEffectorTrigger$
         // .filter(() => false) // 一時的にInboundを止める。
-        .distinctUntilChanged((oldState, newState) => oldState.userId === newState.userId)
+        .distinctUntilChanged((oldState, newState) => oldState.userId === newState.userId) // userIdが変わったら通過する。
         .do(() => this.firebaseRestoreFinished$.next(false))
-        .filter(state => !!state.userId)
+        .filter(state => !!state.userId) // userIdがtruthyなら通過する。
+        .do(() => inboundCanceller$.next())
         .subscribe(state => {
           if (this.firebaseEffector) {
             this.firebaseEffector.connect$<AppState>('store/' + state.userId)
+              .takeUntil(inboundCanceller$) //  inboundCanceller$.next()でストリームを止める。
               .map(cloudState => cloudState ? cloudState : initialState) // クラウドからデータを取得できない場合はinitialStateに置き換える。
               .filter(cloudState => initialState.uuid !== cloudState.uuid) // 自分以外のクライアントがクラウドデータを変更した場合だけ自分に反映させる。
               .subscribe(cloudState => {
                 console.log('============================= Firebase Inbound (uuid:' + cloudState.uuid + ')');
-                // if (cloudState) {
                 this.dispatcher$.next(new RestoreAction(cloudState));
-                // } else {
-                //   alert('Initial user setup is done.');
-                // }
                 this.firebaseRestoreFinished$.next(true);
               });
           }

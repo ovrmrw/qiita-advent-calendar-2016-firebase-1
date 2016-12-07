@@ -25,6 +25,7 @@ export const authIdTokenStateReducer: StateReducer<string | null> =
       } else if (action instanceof UpdateAuthIdTokenAction) {
         const idToken = action.idToken;
         if (idToken) {
+          console.log('idToken:',idToken);
           localStorage.setItem(AUTH_ID_TOKEN, idToken);
         } else {
           localStorage.removeItem(AUTH_ID_TOKEN);

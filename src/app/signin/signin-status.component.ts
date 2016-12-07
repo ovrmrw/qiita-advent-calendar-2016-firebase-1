@@ -32,8 +32,8 @@ export class SigninStatusComponent extends Disposer implements OnInit, OnDestroy
       this.authUser = state.authUser;
       this.firebaseUser = state.firebaseUser;
       this.afterRestore = state.afterRestored;
-      // this.cd.markForCheck();
-      this.markForCheckOnNextFrame();
+      this.cd.markForCheck();
+      // this.markForCheckOnNextFrame();
     });
   }
 

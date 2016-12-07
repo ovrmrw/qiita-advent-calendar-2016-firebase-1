@@ -33,8 +33,8 @@ export class CardListComponent extends Disposer implements OnInit, OnDestroy {
 
     this.disposable = this.store.getState().subscribe(state => {
       this.cards = state.cards;
-      this.markForCheckOnNextFrame();
-      // this.cd.markForCheck();
+      // this.markForCheckOnNextFrame();
+      this.cd.markForCheck();
     });
   }
 

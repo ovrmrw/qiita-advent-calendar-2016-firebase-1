@@ -17,7 +17,7 @@ export class FirebaseEffector {
 
   saveCurrentState<T>(refPath: string, resolvedState: T, deletePropNames: string[] = []): void {
     const firebaseWritableObject = this.getFirebaseWritableObject(resolvedState, deletePropNames);
-    console.log('firebaseWritableObject:', firebaseWritableObject);
+    // console.log('firebaseWritableObject:', firebaseWritableObject);
     const timeStr = '(' + new Date().valueOf() + ') Firebase Write Response';
     console.time(timeStr);
     firebase.database().ref(refPath).update(firebaseWritableObject, err => {
@@ -30,14 +30,11 @@ export class FirebaseEffector {
   connect$<T>(refPath: string): Observable<T> {
     const subject = new Subject<T>();
     firebase.database().ref(refPath).on('value', snapshot => {
-      // this.zone.run(() => { // Zoneが捕捉できるようにするためにzone.runでラップしている。
-        if (snapshot) {
-          const val = snapshot.val() as T;
-          subject.next(val);
-        }
-      });
-    // });
-    // return subject.delay(1); // Zoneが捕捉できるようにするために敢えてdelayを挟んでいる。
+      if (snapshot) {
+        const val = snapshot.val() as T;
+        subject.next(val);
+      }
+    });
     return subject;
   }
 

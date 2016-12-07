@@ -51,6 +51,7 @@ export class AuthService {
 
         this.lock.getProfile(authResult.idToken, async (err, profile) => {
           if (err) { throw err; }
+          console.log('profile:', profile);
           this.dispatcher$.next(new UpdateAuthUserProfileAction(profile));
           await this.updateAuthenticatedState();
         });
