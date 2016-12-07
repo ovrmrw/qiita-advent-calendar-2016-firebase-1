@@ -30,13 +30,13 @@ export class FirebaseEffector {
   connect$<T>(refPath: string): Observable<T> {
     const subject = new Subject<T>();
     firebase.database().ref(refPath).on('value', snapshot => {
-      this.zone.run(() => { // Zoneが捕捉できるようにするためにzone.runでラップしている。
+      // this.zone.run(() => { // Zoneが捕捉できるようにするためにzone.runでラップしている。
         if (snapshot) {
           const val = snapshot.val() as T;
           subject.next(val);
         }
       });
-    });
+    // });
     // return subject.delay(1); // Zoneが捕捉できるようにするために敢えてdelayを挟んでいる。
     return subject;
   }
