@@ -7,14 +7,14 @@ import { Disposer } from '../../lib/class';
 
 
 @Component({
-  selector: 'app-signin',
+  selector: 'app-signin-button',
   template: `
     <button class="btn btn-outline-primary btn-margin" (click)="signIn()" *ngIf="!isAuthed">Sign In</button>
     <button class="btn btn-outline-danger btn-margin" (click)="signOut()" *ngIf="isAuthed">Sign Out</button>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SigninComponent extends Disposer implements OnInit, OnDestroy {
+export class SigninButtonComponent extends Disposer implements OnInit, OnDestroy {
   isAuthed: boolean;
 
 

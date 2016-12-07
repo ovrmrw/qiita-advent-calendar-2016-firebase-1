@@ -29,7 +29,7 @@ export class FirebaseEffector {
 
   connect$<T>(refPath: string): Observable<T> {
     const subject = new Subject<T>();
-    firebase.database().ref(refPath).once('value', snapshot => {
+    firebase.database().ref(refPath).on('value', snapshot => {
       this.zone.run(() => { // Zoneが捕捉できるようにするためにzone.runでラップしている。
         if (snapshot) {
           const val = snapshot.val() as T;

@@ -10,9 +10,10 @@ export interface AppState {
   isAuthed: boolean;
   cards: Card[];
   draftCard: Card | null;
-  uid: string;
+  userId: string;
   restore: boolean;
   afterRestored: boolean;
+  uuid: string;
 }
 
 

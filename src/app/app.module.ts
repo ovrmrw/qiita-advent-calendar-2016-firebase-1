@@ -7,7 +7,7 @@ import { routing } from './app.routes';
 import { AppComponent } from './app.component';
 import { WelcomeComponent } from './welcome';
 import { SecretComponent } from './secret';
-import { SigninComponent } from './signin/signin.component';
+import { SigninButtonComponent, SigninStatusComponent } from './signin';
 import { CardDeckComponent } from './card-deck';
 import { CardListComponent, CardComponent } from './card-list';
 import { CardFormComponent, CardFormService } from './card-form';
@@ -22,7 +22,8 @@ import { FunctionModule } from '../lib/functions';
     AppComponent,
     SecretComponent,
     WelcomeComponent,
-    SigninComponent,
+    SigninButtonComponent,
+    SigninStatusComponent,
     CardDeckComponent,
     CardComponent,
     CardListComponent,

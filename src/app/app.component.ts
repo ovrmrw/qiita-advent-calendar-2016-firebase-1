@@ -23,11 +23,13 @@ import { Disposer } from '../lib/class';
         </li>
       </ul>
       <div class="float-xs-right">
-        <app-signin></app-signin>
+        <app-signin-button></app-signin-button>
       </div>
     </nav>
 
     <router-outlet></router-outlet>
+    <hr />
+    <app-signin-status></app-signin-status>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

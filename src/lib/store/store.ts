@@ -1,5 +1,6 @@
 import { Injectable, Inject, Optional, NgZone } from '@angular/core';
 import { Observable, BehaviorSubject, ReplaySubject, Subject } from 'rxjs/Rx';
+import * as uuid from 'uuid';
 
 import { FirebaseEffector } from './firebase-effector';
 import { Dispatcher, Provider, ReducerContainer } from './common';
@@ -22,9 +23,10 @@ const initialState: AppState = {
   isAuthed: false,
   cards: [],
   draftCard: null,
-  uid: '',
+  userId: '',
   restore: false,
   afterRestored: false,
+  uuid: uuid.v4(), // 起動毎にクライアントを識別するためのユニークなIDを生成する。
 };
 
 
@@ -62,9 +64,9 @@ export class Store {
         (authIdToken, authUser, firebaseUser, graphUsers, cards, draftCard, restore, afterRestored): AppState => {
           const obj = { authIdToken, authUser, firebaseUser, graphUsers, cards, draftCard, restore, afterRestored };
           const isAuthed: boolean = !!authIdToken && !!authUser && !!firebaseUser;
-          const uid: string = authUser && firebaseUser && authUser.user_id === firebaseUser.uid ? firebaseUser.uid : '';
-          console.log('uid:', uid);
-          return Object.assign<{}, AppState, {}, {}>({}, initialState, obj, { isAuthed, uid });
+          const userId: string = authUser && firebaseUser && authUser.user_id === firebaseUser.uid ? firebaseUser.uid : '';
+          console.log('uid:', userId);
+          return Object.assign<{}, AppState, {}, {}>({}, initialState, obj, { isAuthed, userId });
         }
       ])
       .subscribe(newState => {
@@ -84,24 +86,24 @@ export class Store {
 
   private applyEffectors(): void {
     if (this.firebaseEffector) {
-      /* Firebase Inbound (初回ログイン時にFirebaseからデータを取得する) */
+      /* Firebase Inbound (Firebaseからデータを取得する) */
       this.firebaseEffectorTrigger$
         // .filter(() => false) // 一時的にInboundを止める。
-        .distinctUntilChanged((oldState, newState) => oldState.uid === newState.uid)
+        .distinctUntilChanged((oldState, newState) => oldState.userId === newState.userId)
         .do(() => this.firebaseRestoreFinished$.next(false))
-        .filter(state => !!state.uid)
+        .filter(state => !!state.userId)
         .subscribe(state => {
           if (this.firebaseEffector) {
-            this.firebaseEffector.connect$<AppState>('store/' + state.uid)
-              .take(1)
+            this.firebaseEffector.connect$<AppState>('store/' + state.userId)
+              .map(cloudState => !!cloudState ? cloudState : initialState) // クラウドからデータを取得できない場合はinitialStateに置き換える。
+              .filter(cloudState => initialState.uuid !== cloudState.uuid) // 自分以外のクライアントがクラウドデータを変更した場合だけ自分に反映させる。
               .subscribe(cloudState => {
-                console.log('============================= Firebase Inbound');
+                console.log('============================= Firebase Inbound (uuid:' + cloudState.uuid + ')');
                 if (cloudState) {
                   this.dispatcher$.next(new RestoreAction(cloudState));
                 } else {
                   alert('Initial user setup is done.');
                 }
-              }, (err) => { }, () => {
                 this.firebaseRestoreFinished$.next(true);
               });
           }
@@ -114,13 +116,13 @@ export class Store {
           return { state, afterRestored };
         })
         .filter(obj => obj.afterRestored) // RestoreAction発行済みの場合は通過する。
-        .filter(obj => !!obj.state.uid && !obj.state.restore) // RestoreActionではない場合のみ通過する。
+        .filter(obj => !!obj.state.userId && !obj.state.restore) // RestoreActionではない場合のみ通過する。
         .map(obj => obj.state)
         .debounceTime(200)
         .subscribe(state => {
-          console.log('============================= Firebase Outbound');
+          console.log('============================= Firebase Outbound (uuid:' + state.uuid + ')');
           if (this.firebaseEffector) {
-            this.firebaseEffector.saveCurrentState('store/' + state.uid, state);
+            this.firebaseEffector.saveCurrentState('store/' + state.userId, state);
           }
         });
     }
